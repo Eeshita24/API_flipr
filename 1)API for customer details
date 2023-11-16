@@ -3,23 +3,23 @@ import uuid
 
 app = Flask(_name_)
 
-# In-memory storage for customers
+
 customers = []
 
-# API endpoint to add a new customer
+
 @app.route('/add_customer', methods=['POST'])
 def add_customer():
     data = request.get_json()
 
-    # Check if required fields are present
+    
     required_fields = ['name', 'email', 'mobile', 'city']
     if not all(field in data for field in required_fields):
         return jsonify({'error': 'Missing required fields'}), 400
 
-    # Generate a unique customer ID
+   
     customer_id = str(uuid.uuid4())
 
-    # Create a new customer
+   
     new_customer = {
         'id': customer_id,
         'name': data['name'],
@@ -28,12 +28,11 @@ def add_customer():
         'city': data['city']
     }
 
-    # Add the customer to the list
+    
     customers.append(new_customer)
 
     return jsonify({'message': 'Customer added successfully', 'customer_id': customer_id}), 201
 
-# API endpoint to retrieve all customers
 @app.route('/get_customers', methods=['GET'])
 def get_customers():
     return jsonify({'customers': customers})
