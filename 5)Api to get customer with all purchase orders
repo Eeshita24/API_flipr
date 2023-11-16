@@ -1,0 +1,44 @@
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+# Sample data to store customer and purchase order details
+customers = []
+purchase_orders = []
+
+# API endpoint to get customers with all purchase orders
+@app.route('/get_customers_with_purchase_orders', methods=['GET'])
+def get_customers_with_purchase_orders():
+    # Get customers with all purchase orders
+    customers_with_purchase_orders = []
+    for customer in customers:
+        customer_id = customer['id']
+        customer_data = {
+            'customerId': customer_id,
+            'name': customer['name'],
+            'email': customer['email'],
+            'mobile': customer['mobile'],
+            'city': customer['city'],
+            'purchaseOrder': []
+        }
+
+        # Get all purchase orders for the current customer
+        customer_purchase_orders = [po for po in purchase_orders if po['customer_id'] == customer_id]
+
+        for purchase_order in customer_purchase_orders:
+            purchase_order_data = {
+                'purchaseOrderId': purchase_order['id'],
+                'productName': purchase_order['product_name'],
+                'quantity': purchase_order['quantity'],
+                'pricing': purchase_order['pricing'],
+                'mrp': purchase_order['mrp']
+            }
+            customer_data['purchaseOrder'].append(purchase_order_data)
+
+        customers_with_purchase_orders.append(customer_data)
+
+    return jsonify({'customers_with_purchase_orders': customers_with_purchase_orders}), 200
+
+# Run the Flask app
+if __name__ == '__main__':
+    app.run(debug=True)
