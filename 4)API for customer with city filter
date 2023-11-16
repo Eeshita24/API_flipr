@@ -1,0 +1,39 @@
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+# Sample data to store customer, purchase order, and shipping details
+customers = []
+purchase_orders = []
+shipping_details = []
+
+# API endpoint to get customers with shipment details based on city filter
+@app.route('/get_customers_by_city', methods=['GET'])
+def get_customers_by_city():
+    city = request.args.get('city')
+
+    if not city:
+        return jsonify({'error': 'City parameter is missing'}), 400
+
+    # Get customers with shipment details for the specified city
+    customers_with_shipment = []
+    for customer in customers:
+        customer_id = customer['id']
+        shipment_details = [shipment for shipment in shipping_details if shipment['customer_id'] == customer_id and shipment['city'].lower() == city.lower()]
+        
+        if shipment_details:
+            customer_with_shipment = {
+                'customer_id': customer_id,
+                'name': customer['name'],
+                'email': customer['email'],
+                'mobile': customer['mobile'],
+                'city': city,
+                'shipment_details': shipment_details
+            }
+            customers_with_shipment.append(customer_with_shipment)
+
+    return jsonify({'customers_with_shipment': customers_with_shipment}), 200
+
+# Run the Flask app
+if __name__ == '__main__':
+    app.run(debug=True)
