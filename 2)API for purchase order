@@ -1,0 +1,50 @@
+from flask import Flask, request, jsonify
+import uuid
+
+app = Flask(__name__)
+
+# Sample data to store customer and purchase order details
+customers = []
+purchase_orders = []
+
+# API endpoint to add a new purchase order
+@app.route('/add_purchase_order', methods=['POST'])
+def add_purchase_order():
+    data = request.get_json()
+
+    # Ensure all required fields are present
+    required_fields = ['customer_id', 'product_name', 'quantity', 'pricing', 'mrp']
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    # Check if customer ID exists
+    customer_id = data['customer_id']
+    customer = next((c for c in customers if c['id'] == customer_id), None)
+    if not customer:
+        return jsonify({'error': 'Customer not found'}), 404
+
+    # Generate a unique purchase order ID
+    purchase_order_id = str(uuid.uuid4())
+
+    # Ensure pricing is not greater than MRP
+    if data['pricing'] > data['mrp']:
+        return jsonify({'error': 'Pricing cannot be greater than MRP'}), 400
+
+    # Create a new purchase order object
+    new_purchase_order = {
+        'id': purchase_order_id,
+        'customer_id': customer_id,
+        'product_name': data['product_name'],
+        'quantity': data['quantity'],
+        'pricing': data['pricing'],
+        'mrp': data['mrp']
+    }
+
+    # Add the purchase order to the list
+    purchase_orders.append(new_purchase_order)
+
+    return jsonify({'message': 'Purchase order added successfully', 'purchase_order_id': purchase_order_id}), 201
+
+# Run the Flask app
+if __name__ == '__main__':
+    app.run(debug=True)
